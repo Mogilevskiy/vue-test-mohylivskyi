@@ -9,15 +9,22 @@
       <div class="col-sm">
         <div class="product-info">
           <h2>{{ product }}</h2>
-          <p v-if="inventory >= 5">In Stock</p>
-          <p v-else-if="inventory < 10 && inventory > 0">Almost sold out</p>
+          <p v-if="inventory >= 3">In Stock</p>
+          <p v-else-if="inventory < 2 && inventory > 0">Almost sold out</p>
           <p v-else>Out of Stock</p>
-          <ul>
-            <li v-for="detail in details">{{detail}}</li>
-          </ul>
-          <button v-for="variant in variants" v-bind:key="variant.variantId" @click="updateProduct(variant.image)" class="btn btn-light">{{ variant.color }}</button>
-          <div>
-            <button v-on:click="cart += 1" class="btn btn-primary">Add to Cart</button>
+          <div v-for="(variant, index) in variants"
+               v-bind:key="variant.variantId"
+               @click="updateProduct(index)"
+               :style="{backgroundColor: variant.color}"
+               class="color-box" >
+          </div>
+          <!--<button v-for="variant in variants" v-bind:key="variant.variantId" @click="updateProduct(variant.image)" class="btn btn-light btn-item-color">{{ variant.color }}</button>-->
+          <div class="cart-display">
+            <button v-on:click="addToCart"
+                    :disabled="!inStock"
+                    class="btn btn-primary">
+              Add to Cart
+            </button>
             <div class="cart">Cart ({{cart}})</div>
           </div>
         </div>
@@ -31,33 +38,45 @@ export default {
   name: 'Car',
   data () {
     return {
+      brand: 'Porshe',
+      selectedVariant: 0,
       image: 'https://img.automoto.ua/auto/Maserati-Ghibli-belyiy-none-2013-26-12232913.jpeg',
       product: 'Porshe Panamera',
-      inStock: true,
-      inventory: 4,
-      details: [
-        'Black',
-        2014
-      ],
+      inventory: 5,
       variants: [
         {
           variantId: 2233,
-          color: 'white',
-          image: 'https://img.automoto.ua/auto/Maserati-Ghibli-belyiy-none-2013-26-12232913.jpeg'
+          color: 'grey',
+          image: 'https://img.automoto.ua/auto/Maserati-Ghibli-belyiy-none-2013-26-12232913.jpeg',
+          variantQuantity: 5
         },
         {
-          variant: 2244,
+          variantId: 2244,
           color: 'black',
-          image: 'https://d2pa5gi5n2e1an.cloudfront.net/global/images/product/cars/Maserati_GHIBLI2/Maserati_GHIBLI2_L_1.jpg'
+          image: 'https://d2pa5gi5n2e1an.cloudfront.net/global/images/product/cars/Maserati_GHIBLI2/Maserati_GHIBLI2_L_1.jpg',
+          variantQuantity: 0
         }
       ],
       cart: 0
     }
   },
   methods: {
-    updateProduct: function (variantImage) {
-      this.image = variantImage
+    updateProduct: function (index) {
+      this.selectedVariant = index
+      this.image = this.variants[index].image
+    },
+    addToCart: function () {
+      if (this.variants[this.selectedVariant].variantQuantity) {
+        this.cart += 1
+        this.variants[this.selectedVariant].variantQuantity -= 1
+      }
     }
+  },
+  computed: {
+    inStock: function () {
+      return this.variants[this.selectedVariant].variantQuantity
+    }
+
   }
 }
 </script>
@@ -95,5 +114,19 @@ export default {
     display: block;
     background-color: slategray;
     width: 50px;
+  }
+  .cart-display {
+    margin-bottom: 10px;
+  }
+  .btn-item-color {
+    margin-bottom: 10px;
+  }
+  .color-box {
+    display: inline-block;
+    margin-right: 10px;
+    border-radius: 10px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
   }
 </style>
